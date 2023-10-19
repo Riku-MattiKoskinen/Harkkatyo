@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Maker</title>
+    <script src="js/music-maker.js" defer></script>
+</head>
+<body>
+    <h1>Music Maker</h1>
+    <button id="play">Play</button>
+    <button id="download">Download Song</button>
+    <input type="file" id="input-sample" name="input-sample" accept="audio/*">
+    <button id="upload">Add new sample</button>
+    <br>
+
+    <!-- Volume Controls -->
+    <div id="volumeControls">
+        <h2>Volume Controls</h2>
+        <!-- Volume sliders will be dynamically added here -->
+    </div>
+
+    <!-- Track Selection -->
+    <div id="trackSelection">
+        <h2>Track Selection</h2>
+        <!-- Radio buttons for track selection will be dynamically added here -->
+    </div>
+
+    <!-- Instrument Categories -->
+    <div id="instrumentCategories">
+        <h2>Available Instruments</h2>
+        <div id="basses" class="instrumentCategory">
+            <h3>Basses</h3>
+            <!-- Bass instruments will be dynamically added here -->
+        </div>
+        <div id="guitars" class="instrumentCategory">
+            <h3>Guitars</h3>
+            <!-- Guitar instruments will be dynamically added here -->
+        </div>
+        <div id="drums" class="instrumentCategory">
+            <h3>Drums</h3>
+            <!-- Drum instruments will be dynamically added here -->
+        </div>
+        <!-- Add more categories as needed -->
+    </div>
+
+    <!-- Tracks -->
+    <div id="tracks">
+        <h2>Tracks</h2>
+        <!-- Tracks will be dynamically added here -->
+    </div>
+
+    <!-- Microphone Recording -->
+    <button id="startRecording">Start Recording</button>
+    <button id="stopRecording">Stop Recording</button>
+
+</body>
+</html>
