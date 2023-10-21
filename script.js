@@ -1,4 +1,4 @@
-const jsonQuery = {
+/*const jsonQuery1 = {
     "query": [
       {
         "code": "Vuosi",
@@ -378,16 +378,89 @@ const jsonQuery = {
     "response": {
       "format": "json-stat2"
     }
-}
+}*/
 
-const getData  = async () => {
+const jsonQuery2 = {
+    "query": [
+      {
+        "code": "Vuosi",
+        "selection": {
+          "filter": "item",
+          "values": [
+            "2023"
+          ]
+        }
+      },
+      {
+        "code": "Puolue",
+        "selection": {
+          "filter": "item",
+          "values": [
+            "03",
+            "02",
+            "01",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09"
+          ]
+        }
+      },
+      {
+        "code": "Sukupuoli",
+        "selection": {
+          "filter": "item",
+          "values": [
+            "SSS"
+          ]
+        }
+      },
+      {
+        "code": "Ikä",
+        "selection": {
+          "filter": "item",
+          "values": [
+            "SSS"
+          ]
+        }
+      },
+      {
+        "code": "Vaalipiiri",
+        "selection": {
+          "filter": "item",
+          "values": [
+            "VP01",
+            "VP02",
+            "VP03",
+            "VP04",
+            "VP06",
+            "VP07",
+            "VP08",
+            "VP09",
+            "VP10",
+            "VP11",
+            "VP12",
+            "VP13",
+            "VP05"
+          ]
+        }
+      }
+    ],
+    "response": {
+      "format": "json-stat2"
+    }
+  }
+
+/*const getData  = async () => {
     const url = "https://statfin.stat.fi:443/PxWeb/api/v1/fi/StatFin/evaa/statfin_evaa_pxt_13sw.px"
     const res = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(jsonQuery)
+        body: JSON.stringify(jsonQuery1)
     })
     if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -463,4 +536,99 @@ getData().then(data => {
 document.getElementById("update-chart").addEventListener("click", () => {
     const selectedMunicipality = document.getElementById("municipalities").value;
     buildChart(selectedMunicipality);
+});*/
+
+// Second chart starts here
+const getCandidateData = async () => {
+    const url = "https://statfin.stat.fi:443/PxWeb/api/v1/fi/StatFin/evaa/statfin_evaa_pxt_13sm.px"
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(jsonQuery2)
+    })
+    if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json()
+    return data
+}
+
+const populateDropdown = (allRegions) => {
+    const selectElement = document.getElementById("municipalities");
+    allRegions.forEach(region => {
+        const option = document.createElement("option");
+        option.value = region;
+        option.text = region;
+        selectElement.appendChild(option);
+    })
+};
+
+const buildCandidateChart = async () => {
+    const data = await getCandidateData()
+    //console.log(data)
+
+    const allRegions = Object.values(data.dimension.Vaalipiiri.category.label);
+    const chosenRegion = "VP01 Helsingin vaalipiiri";
+    const parties = Object.values(data.dimension.Puolue.category.label);
+    const values = Object.values(data.value);
+    const chosenIndex = allRegions.indexOf(chosenRegion);
+
+    if (chosenIndex === -1) {
+        console.error("Chosen region not found in data");
+        return;
+    }
+
+    //console.log(allRegions)
+    //console.log(parties)
+    //console.log(values)
+
+    parties.forEach((party, index) => {
+        let partyCandidates = [];
+        for(let i = 0; i < 1; i++) {
+            partyCandidates.push(values[index * 1 + i]);
+        }
+        parties[index] = {
+            name: party,
+            values: partyCandidates
+        }
+    })
+
+    //console.log(parties) OK
+
+    const chartData = {
+        labels: [chosenRegion],
+        datasets: parties
+    }
+
+    const chart = new frappe.Chart("#chart", {
+        title: "Finnish parliamentary election 2023",
+        data: chartData,
+        type: "bar",
+        height: 500,
+        
+        barOptions: {
+            regionFill: 1,
+            gradient: 1,
+            stacked: 0,
+            spaceRatio: 0.5,
+
+        },
+    })
+
+
+}
+
+getCandidateData().then(data => {
+    const allMunicipalities = Object.values(data.dimension["Vaalipiiri"].category.label);
+    populateDropdown(allMunicipalities);
+    buildCandidateChart("KU071 Haapavesi"); // Default municipality
 });
+
+document.getElementById("update-chart").addEventListener("click", () => {
+    const chosenRegion = document.getElementById("municipalities").value;
+    buildCandidateChart(chosenRegion);
+});
+
+
+buildCandidateChart()
