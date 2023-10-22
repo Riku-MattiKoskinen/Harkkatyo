@@ -1,22 +1,14 @@
-/* style.css */
-
 body {
-    font-family: Arial, sans-serif; /* Applying a basic font for the entire body */
+    font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f4f4f4;
 }
 
-/* Styling for the charts */
-
-/* Styling for the selection box */
-
-
-/* Styling for the select elements */
 select {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 48%; /* split width for two select boxes */
+    width: 100%; /* adjusted width for single column layout */
     font-size: 16px;
     appearance: none; /* remove default styling */
     -webkit-appearance: none; /* remove default styling for Webkit browsers */
@@ -32,3 +24,63 @@ select:focus {
     outline: none;
     border-color: #007BFF; /* highlight color when focused */
 }
+
+#draggable-container div {
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#dropzone {
+    margin-top: 20px;
+    padding: 20px;
+    border: 2px dashed #ccc;
+    text-align: center;
+    height: 40px;
+    border-radius: 10px;
+    background-color: #fafafa;
+    transition: background-color 0.2s, border-color 0.2s;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+
+}
+
+.selection-section, .chart-section {
+    width: 100%;
+}
+
+.dragndrop-section {
+    display: flex;
+    justify-content: space-between;  /* This ensures there's a bit of space between the two containers */
+}
+
+/* Styles for draggable-container and dropzone */
+#draggable-container, #dropzone {
+    width: 50%;  /* Adjust this if you want a different ratio */
+}
+
+.downloadSVG {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #e96f6c, #d32f2f);
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.2s;
+    margin-top: 10px;
+}
+
+.downloadSVG:hover {
+    transform: scale(1.05);
+}
+
+.downloadSVG:before {
+    content: '\21E9';  /* Unicode character for download icon */
+    font-size: 20px;
+    color: white;
+}
+

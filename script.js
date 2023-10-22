@@ -176,15 +176,17 @@ const getCandidateData = async () => {
 }
 
 const populateMunicipalityDropdown = (municipalities) => {
-    const selectElement = document.getElementById("municipalities");
-    selectElement.innerHTML = "";
-    const orderedMunicipalaities = municipalities.sort();
-    orderedMunicipalaities.forEach(municipality => {
-        const option = document.createElement("option");
-        option.value = municipality;
-        option.text = municipality;
-        selectElement.appendChild(option);
-    })
+    const container = document.getElementById("draggable-container");
+    container.innerHTML = "";
+    const orderedMunicipalities = municipalities.sort();
+    orderedMunicipalities.forEach(municipality => {
+        const div = document.createElement("div");
+        div.setAttribute('draggable', true);
+        div.setAttribute('ondragstart', 'drag(event)');
+        div.setAttribute('data-value', municipality);  // Store the municipality value as a data attribute
+        div.innerText = municipality;
+        container.appendChild(div);
+    });
 };
 
 const populateChartDropdown = () => {
@@ -255,6 +257,11 @@ const buildElectionChart = async (chosenMunicipality) => {
         datasets: parties
     };
 
+    if (candidateChart) {
+      clearChartContainer();
+      candidateChart = null;
+  }
+
 
     if (electionChart) {
         // Update existing chart
@@ -316,6 +323,11 @@ const buildCandidateChart = async (chosenMunicipality) => {
         datasets: parties
     };
 
+    if (electionChart) {
+      clearChartContainer();
+      electionChart = null;
+  }
+
     if (candidateChart) {
         // Update existing chart
         try{
@@ -331,6 +343,7 @@ const buildCandidateChart = async (chosenMunicipality) => {
             data: chartData,
             type: "bar",
             height: 500,
+            width: 500,
             barOptions: {
                 regionFill: 1,
                 gradient: 1,
@@ -351,16 +364,33 @@ const initializePage = async () => {
     await buildSelectedChart("Puoluekannatus");  // Wait for this function to complete
 };
 
-document.getElementById("municipalities").addEventListener("change", () => {
-    const selectedMunicipality = document.getElementById("municipalities").value;
+const clearChartContainer = () => {
+  const container = document.querySelector("#chart");
+  while (container.firstChild) {
+      container.removeChild(container.firstChild);
+  }
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.dataset.value);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    const selectedMunicipality = ev.dataTransfer.getData("text");
     const selectedChart = document.getElementById("data-type").value;
+    document.getElementById("dropzone").textContent = selectedMunicipality;
 
     if (selectedChart === "Puoluekannatus") {
         buildElectionChart(selectedMunicipality);
     } else if (selectedChart === "Ehdokkaiden määrä") {
         buildCandidateChart(selectedMunicipality);
     }
-});
+}
 
 document.getElementById("data-type").addEventListener("change", async() => {
     const selectedChart = document.getElementById("data-type").value;
@@ -371,5 +401,40 @@ document.getElementById("data-type").addEventListener("change", async() => {
 // Run the script after the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     initializePage();
+    document.getElementById("downloadSVG").addEventListener("click", function(){
+    let svg = document.querySelector("#chart svg");  // Assuming frappe creates an SVG inside the element with id "chart"
+    if(svg) {
+        let serializer = new XMLSerializer();
+        let source = serializer.serializeToString(svg);
+        
+        let blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+        let url = URL.createObjectURL(blob);
+
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = "chart.svg";
+        a.click();
+    }
 });
+
+
+});
+
+document.getElementById("downloadSVG").addEventListener("click", function(){
+  let svg = document.querySelector("#chart svg");  // Assuming frappe creates an SVG inside the element with id "chart"
+  if(svg) {
+      let serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      
+      let blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+      let url = URL.createObjectURL(blob);
+
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = "chart.svg";
+      a.click();
+  }
+});
+
+
 

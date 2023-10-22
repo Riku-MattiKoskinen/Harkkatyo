@@ -11,12 +11,20 @@
 
 </head>
 <body>
-    <div id="chart"></div>
-    <div id="candidateChart"></div>
-    <div id="draggable-container"></div>
-    <div id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)">Drop here</div>
-    <!--<div id="selection-box"></div>
-    <select id="municipalities"></select>-->
+    <div class="content-side">
+        <div class="chart-section">
+            <div id="chart"></div>
+            <div id="candidateChart"></div>
+        </div>
+    </div>
+    <div class="content-side">
+        <div class="dragndrop-section">
+            <div id="draggable-container"></div>
+            <div id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)">Drop here</div>
+        </div>
+    </div>
     <select id="data-type"></select>
+    <button class="downloadSVG"></button>
 </body>
+
 </html>
