@@ -52,7 +52,6 @@ const jsonQuery1 = {
           "110000",
           "120000",
           "130000",
-          "050000"
         ]
       }
     },
@@ -134,7 +133,6 @@ const jsonQuery2 = {
             "VP11",
             "VP12",
             "VP13",
-            "VP05"
           ]
         }
       }
@@ -142,7 +140,7 @@ const jsonQuery2 = {
     "response": {
       "format": "json-stat2"
     }
-  }
+}
 
 const getData  = async () => {
     const url = "https://statfin.stat.fi:443/PxWeb/api/v1/fi/StatFin/evaa/statfin_evaa_pxt_13sw.px"
@@ -158,89 +156,16 @@ const getData  = async () => {
     }
     const data = await res.json()
     return data
-}
-
-const populateDropdown = (municipalities) => {
-    const selectElement = document.getElementById("municipalities");
-    municipalities.forEach(municipality => {
-        const option = document.createElement("option");
-        option.value = municipality;
-        option.text = municipality;
-        selectElement.appendChild(option);
-    })
 };
 
-
-const buildChart = async (chosenMunicipality) => {
-    const data = await getData()
-    const parties = Object.values(data.dimension.Puolue.category.label);
-    const labelName = "Vaalipiiri ja kunta vaalivuonna";
-    //const chosenMunicipality = "VP01 Helsingin vaalipiiri";
-
-    const allMunicipalities = Object.values(data.dimension[labelName].category.label);
-    const chosenIndex = allMunicipalities.indexOf(chosenMunicipality);
-
-    if (chosenIndex === -1) {
-        console.error("Chosen municipality not found in data");
-        return;
-    }
-
-    const values = Object.values(data.value);
-
-    parties.forEach((party, index) => {
-        let partySupport = [];
-        partySupport.push(values[chosenIndex * parties.length + index]);
-        
-        parties[index] = {
-            name: party,
-            values: partySupport
-        }
-    })
-
-    const chartData = {
-        labels: [chosenMunicipality], // Only the chosen municipality
-        datasets: parties
-    }
-
-    const chart = new frappe.Chart("#chart", {
-        title: "Finnish parliamentary election 2023",
-        data: chartData,
-        type: "bar",
-        height: 500,
-        
-        barOptions: {
-            regionFill: 1,
-            gradient: 1,
-            stacked: 0,
-            spaceRatio: 0.5,
-
-        },
-    })
-};
-
-getData().then(data => {
-    const allMunicipalities = Object.values(data.dimension["Vaalipiiri ja kunta vaalivuonna"].category.label);
-    populateDropdown(allMunicipalities);
-    buildChart("KU071 Haapavesi"); // Default municipality
-});
-
-/*document.getElementById("update-chart").addEventListener("click", () => {
-    const selectedMunicipality = document.getElementById("municipalities").value;
-    buildChart(selectedMunicipality);
-});*/
-
-document.getElementById("municipalities").addEventListener("change", () => {
-    const selectedMunicipality = document.getElementById("municipalities").value;
-    buildChart(selectedMunicipality);
-});
-
-/* Second chart starts here
 const getCandidateData = async () => {
+    
     const url = "https://statfin.stat.fi:443/PxWeb/api/v1/fi/StatFin/evaa/statfin_evaa_pxt_13sm.px"
-
     const res = await fetch(url, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(jsonQuery2)
     })
     if (!res.ok) {
@@ -250,85 +175,201 @@ const getCandidateData = async () => {
     return data
 }
 
-const populateDropdown = (allRegions) => {
+const populateMunicipalityDropdown = (municipalities) => {
     const selectElement = document.getElementById("municipalities");
-    allRegions.forEach(region => {
+    selectElement.innerHTML = "";
+    const orderedMunicipalaities = municipalities.sort();
+    orderedMunicipalaities.forEach(municipality => {
         const option = document.createElement("option");
-        option.value = region;
-        option.text = region;
+        option.value = municipality;
+        option.text = municipality;
         selectElement.appendChild(option);
     })
 };
 
-const buildCandidateChart = async () => {
-    const data = await getCandidateData()
-    //console.log(data)
+const populateChartDropdown = () => {
+    const chart = ["Puoluekannatus", "Ehdokkaiden määrä"];
+    const selectElement = document.getElementById("data-type");
+    selectElement.innerHTML = "";
+    chart.forEach(chart => {
+        const option = document.createElement("option");
+        option.value = chart;
+        option.text = chart;
+        selectElement.appendChild(option);
+    })
+};
 
-    const allRegions = Object.values(data.dimension.Vaalipiiri.category.label);
-    const chosenRegion = "VP01 Helsingin vaalipiiri";
+
+const buildSelectedChart = async (selectedChart) => {
+    
+    //const selectedChart = document.getElementById("data-type").value;
+    let data;
+    let allMunicipalities;
+
+    if (selectedChart === "Puoluekannatus") {
+        data = await getData();  // Use await here
+        allMunicipalities = Object.values(data.dimension["Vaalipiiri ja kunta vaalivuonna"].category.label);
+        populateMunicipalityDropdown(allMunicipalities);
+
+    } else if (selectedChart === "Ehdokkaiden määrä") {
+        data = await getCandidateData();  // Use await here
+        allMunicipalities = Object.values(data.dimension["Vaalipiiri"].category.label);
+        populateMunicipalityDropdown(allMunicipalities);
+
+    }
+};
+
+let electionChart = null;  // Declare a variable to hold the election chart object
+let candidateChart = null;  // Declare a variable to hold the chart object
+
+const buildElectionChart = async (chosenMunicipality) => {
+    const data = await getData();
     const parties = Object.values(data.dimension.Puolue.category.label);
-    const values = Object.values(data.value);
-    const chosenIndex = allRegions.indexOf(chosenRegion);
+
+    const labelName = "Vaalipiiri ja kunta vaalivuonna";
+
+    const allMunicipalities = Object.values(data.dimension[labelName].category.label);
+    const orderedMunicipalaities = allMunicipalities.sort();
+    const chosenIndex = orderedMunicipalaities.indexOf(chosenMunicipality);
+
+    if (chosenIndex === -1) {
+        console.error("Chosen municipality not found in data");
+        return;
+    }
+
+    const values = data.value;
+
+    parties.forEach((party, index) => {
+        let partySupport = [values[chosenIndex + 12 * index]];
+
+        parties[index] = {
+            name: party,
+            values: partySupport
+        }
+    });
+
+    console.log("parties: ", parties);
+
+    const chartData = {
+        labels: [chosenMunicipality],
+        datasets: parties
+    };
+
+
+    if (electionChart) {
+        // Update existing chart
+    
+        try {
+            electionChart.update(chartData);
+            console.log("Election-chart updated");
+        } catch (error) {
+            console.error("Error in buildElectionChart: ", error);
+        }
+    } else {
+        // Create new chart
+        electionChart = new frappe.Chart("#chart", {
+            title: "Puoluekannatus 2023",
+            data: chartData,
+            type: "bar",
+            height: 500,
+            // set coulors from different shades of blue
+            
+            barOptions: {
+                regionFill: 1,
+                gradient: 1,
+                stacked: 0,
+                spaceRatio: 0.5,
+            },
+        });
+        console.log("New election-chart created");
+    }
+};
+
+
+const buildCandidateChart = async (chosenMunicipality) => {
+    try {
+    const data = await getCandidateData();
+    
+    const allRegions = Object.values(data.dimension.Vaalipiiri.category.label);
+    const parties = Object.values(data.dimension.Puolue.category.label);
+    const values = data.value;
+    const orderedRegions = allRegions.sort();
+    const chosenIndex = orderedRegions.indexOf(chosenMunicipality);
 
     if (chosenIndex === -1) {
         console.error("Chosen region not found in data");
         return;
     }
 
-    //console.log(allRegions)
-    //console.log(parties)
-    //console.log(values)
-
     parties.forEach((party, index) => {
-        let partyCandidates = [];
-        for(let i = 0; i < 1; i++) {
-            partyCandidates.push(values[index * 1 + i]);
-        }
+        let partyCandidates = [values[chosenIndex + 12 * index]];
+
         parties[index] = {
             name: party,
             values: partyCandidates
         }
-    })
-
-    //console.log(parties) OK
+    });
+    // log the type of parties
 
     const chartData = {
-        labels: [chosenRegion],
+        labels: [chosenMunicipality],
         datasets: parties
+    };
+
+    if (candidateChart) {
+        // Update existing chart
+        try{
+            candidateChart.update(chartData);
+            console.log("Candidatec-hart updated");
+        } catch (error) {
+            console.error("Error in buildCandidateChart: ", error);
+        }
+    } else {
+        // Create new chart
+        candidateChart = new frappe.Chart("#chart", {
+            title: "Kandanedustajia ehdolla 2023",
+            data: chartData,
+            type: "bar",
+            height: 500,
+            barOptions: {
+                regionFill: 1,
+                gradient: 1,
+                stacked: 0,
+                spaceRatio: 0.5,
+            },
+        });
+        console.log("New candidate-chart created");
     }
+    } catch (error) {
+        console.error("Error in buildCandidateChart: ", error);
+    }
+};
 
-    const chart = new frappe.Chart("#chart", {
-        title: "Finnish parliamentary election 2023",
-        data: chartData,
-        type: "bar",
-        height: 500,
-        
-        barOptions: {
-            regionFill: 1,
-            gradient: 1,
-            stacked: 0,
-            spaceRatio: 0.5,
-
-        },
-    })
-
-
-}
-
-getCandidateData().then(data => {
-    const allMunicipalities = Object.values(data.dimension["Vaalipiiri"].category.label);
-    populateDropdown(allMunicipalities);
-    buildCandidateChart("KU071 Haapavesi"); // Default municipality
-});
-
-//document.getElementById("update-chart").addEventListener("click", () => {
-//    const chosenRegion = document.getElementById("municipalities").value;
-//    buildCandidateChart(chosenRegion);
-//});
+// Initialize the page
+const initializePage = async () => {
+    populateChartDropdown();
+    await buildSelectedChart("Puoluekannatus");  // Wait for this function to complete
+};
 
 document.getElementById("municipalities").addEventListener("change", () => {
     const selectedMunicipality = document.getElementById("municipalities").value;
-    buildChart(selectedMunicipality);
+    const selectedChart = document.getElementById("data-type").value;
+
+    if (selectedChart === "Puoluekannatus") {
+        buildElectionChart(selectedMunicipality);
+    } else if (selectedChart === "Ehdokkaiden määrä") {
+        buildCandidateChart(selectedMunicipality);
+    }
 });
 
-*/
+document.getElementById("data-type").addEventListener("change", async() => {
+    const selectedChart = document.getElementById("data-type").value;
+    buildSelectedChart(selectedChart);
+});
+
+
+// Run the script after the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+    initializePage();
+});
+

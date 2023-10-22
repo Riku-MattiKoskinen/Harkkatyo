@@ -5,15 +5,18 @@
     <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
     <meta http-equiv = "X-UA-Compatible" content = "ie=edge">
     <title>Puoluekannatus</title>
+    <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/frappe-charts@1.2.4/dist/frappe-charts.min.iife.js"></script>
 
 </head>
 <body>
     <div id="chart"></div>
-    <select id="municipalities"></select>
+    <div id="candidateChart"></div>
+    <div id="draggable-container"></div>
+    <div id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)">Drop here</div>
+    <!--<div id="selection-box"></div>
+    <select id="municipalities"></select>-->
     <select id="data-type"></select>
-    <!--<button id="update-chart">Update Chart</button>-->
-    <button id="change-data">Change Data</button>
 </body>
 </html>

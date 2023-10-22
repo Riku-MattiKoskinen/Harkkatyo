@@ -1,0 +1,34 @@
+/* style.css */
+
+body {
+    font-family: Arial, sans-serif; /* Applying a basic font for the entire body */
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+
+/* Styling for the charts */
+
+/* Styling for the selection box */
+
+
+/* Styling for the select elements */
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 48%; /* split width for two select boxes */
+    font-size: 16px;
+    appearance: none; /* remove default styling */
+    -webkit-appearance: none; /* remove default styling for Webkit browsers */
+    -moz-appearance: none; /* remove default styling for Firefox */
+    background-color: #fff;
+}
+
+select:hover {
+    border-color: #888;
+}
+
+select:focus {
+    outline: none;
+    border-color: #007BFF; /* highlight color when focused */
+}
